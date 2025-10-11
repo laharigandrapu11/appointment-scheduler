@@ -1,10 +1,13 @@
 package com.example.appointment_scheduler.service;
 
-import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.appointment_scheduler.error.IncorrectPasswordException;
+import com.example.appointment_scheduler.error.UserAlreadyExistsException;
+import com.example.appointment_scheduler.error.UserNotFoundException;
 import com.example.appointment_scheduler.model.User;
 import com.example.appointment_scheduler.repository.UserRepository;
 
@@ -15,22 +18,23 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
     
     @Override
-    public User saveUser(User user) {
+    public User saveUser(User user) throws UserAlreadyExistsException {
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new UserAlreadyExistsException("User with {user.getEmail()} email already exists, try logging in!");
+        }
         return userRepository.save(user);
     }
 
     @Override
-    public List<User> fetchUsers() {
-
-        return userRepository.findAll();
-
-    }
-
-
-    @Override
-    public User fetchUserByEmail(String emailId) {
-
-        return userRepository.findByEmail(emailId).get();
+    public User validateUser(String email, String password) throws IncorrectPasswordException, UserNotFoundException {
+        Optional<User> user =  userRepository.findByEmail(email);
+        if(!user.isPresent()){
+            throw new UserNotFoundException("User Not Available!");
+        }
+        else if(!user.get().getPassword().equals(password)){
+            throw new IncorrectPasswordException("Incorrect Password!");
+        }
+        return user.get();
     }
     
 }

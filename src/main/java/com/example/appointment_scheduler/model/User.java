@@ -4,20 +4,16 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.AllArgsConstructor;
 
 @Entity
 @Data
 @Table(name = "users")
-@Getter
-@Setter
 @NoArgsConstructor
 
 @AllArgsConstructor
-
+//Entity class for User
 public class User {
     
     @Id

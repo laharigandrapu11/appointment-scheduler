@@ -10,10 +10,7 @@ import com.example.appointment_scheduler.model.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
     //save, delete, findAll are provided by JpaRepository
-    Optional<User> findByUsername(String username);
     Optional<User> findByEmail(String email);
-
-    boolean existsByUsername(String username);
     boolean existsByEmail(String email);
     
 }
