@@ -29,7 +29,7 @@ public class UserController {
     private final AppointmentService appointmentService;
     private final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
-    // Constructor injection ensures Spring provides the service implementations
+    // Constructor injection to provide the services
     public UserController(UserService userService, AppointmentService appointmentService) {
         this.userService = userService;
         this.appointmentService = appointmentService;

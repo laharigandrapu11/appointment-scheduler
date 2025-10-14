@@ -22,6 +22,11 @@ public class WebController {
         this.appointmentService = appointmentService;
     }
 
+    @ModelAttribute(name = "appointment")
+    public Appointment appointment() {
+        return new Appointment();
+    }
+
     @GetMapping("/login")
     public String loginPage() {
         return "login";
@@ -69,10 +74,6 @@ public class WebController {
         return "create-appointment-prof";
     }
     
-    @ModelAttribute(name = "appointment")
-    public Appointment appointment() {
-        return new Appointment();
-    }
     
     @PostMapping("/appointments")
     public String processAppointment(@Valid Appointment appointment, Errors errors, HttpSession session) {
