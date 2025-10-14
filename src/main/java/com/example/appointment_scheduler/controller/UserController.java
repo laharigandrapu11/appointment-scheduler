@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.servlet.http.HttpSession;
 
 import com.example.appointment_scheduler.error.IncorrectPasswordException;
 import com.example.appointment_scheduler.error.UserAlreadyExistsException;
@@ -44,19 +45,13 @@ public class UserController {
 
     @PostMapping("/users/login")
     //converting the request from json to Login object using RequestBody
-    public User validateUser(@Valid @RequestBody Login login) throws IncorrectPasswordException, UserNotFoundException {
+    public User validateUser(@Valid @RequestBody Login login, HttpSession session) throws IncorrectPasswordException, UserNotFoundException {
         LOGGER.info("Logging in user with email: {}", login.getEmail());
-        return userService.validateUser(login.getEmail(), login.getPassword());
-        
+        User user = userService.validateUser(login.getEmail(), login.getPassword());
+        session.setAttribute("user", user);
+        return user;
     }
 
-    @PostMapping("/appointments")
-    //converting the request from json to appointmnet object using RequestBody
-    public Appointment createAppointment(@Valid @RequestBody Appointment app) {
-        LOGGER.info("Creating appointment at : {}", app.getStartTime());
-        return appointmentService.saveAppointment(app);
-        
-    }
 
     @GetMapping("/appointments")
     public List<Appointment> getAppointments() {

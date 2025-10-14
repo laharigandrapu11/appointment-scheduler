@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Appointment Scheduler</title>
+  </head>
+  
+  <body>
+    <h1>Welcome to Appointment Scheduler System</h1>
+    
+    <div th:if="${user != null}">
+      <h2>Hi, <span th:text="${user.username}">User</span>!</h2>
+      
+      <div th:if="${user.role == 'STUDENT' or user.role == 'TA'}">
+        <div class="grid">
+          <div class="option-group">
+            <h4>View Available Appointments</h4>
+            <a th:href="@{/appointments/book}">View Available Appointments</a>
+          </div>
+        </div>
+      </div>
+
+      <div th:if="${user.role == 'PROFESSOR'}">
+        <div class="grid">
+          <div class="option-group">
+            <h4>Create New Appointment</h4>
+            <a th:href="@{/appointments/schedule}">Create New Appointment</a>
+          </div>
+          <div class="option-group">
+            <h4>Upcoming Appointments</h4>
+            <a th:href="@{/appointments/upcoming}">View Available Appointments</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div th:if="${user == null}">
+      <h3>Please log in/register to access!</h3>
+      <div>
+        <a th:href="@{/login}">Login</a> | 
+        <a th:href="@{/register}">Register</a>
+      </div>
+    </div>
+
+  </body>
+</html>

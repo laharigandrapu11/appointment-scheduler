@@ -27,7 +27,7 @@ public class User {
     private String password;
 
     @NotBlank(message = "Email is a required field!!")
-    @Email(message = "Email should be valid!!", regexp = "^[A-Za-z0-9._%+-]+@iu\\.edu$")
+    @Email(message = "Email should be valid!!")
     private String email;
 
     @NotBlank(message = "Role is a required field!!")
