@@ -9,7 +9,8 @@
     <div>
       <div>
         <h1>Upcoming Appointments</h1>
-        <a th:href="@{/}">Home Page</a>
+        <a th:href="@{/}">Home Page</a> | 
+        <a th:href="@{/logout}">Logout</a>
       </div>
       
       <div th:if="${appointments != null and !appointments.empty}">

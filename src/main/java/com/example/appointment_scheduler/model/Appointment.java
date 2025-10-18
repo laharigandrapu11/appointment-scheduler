@@ -18,30 +18,55 @@ public class Appointment {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    @NotBlank
+    @NotBlank(message = "Title is required!!")
     private String title;
-
-    @NotBlank
+    
+    @NotBlank(message = "Description is required!!")
     private String description;
-
-    @NotBlank
-    private String appointmentType; 
-
-    @NotNull
-    private LocalDate date;
-
-    @NotNull
-    private LocalTime startTime;
-
-    @NotNull
-    private LocalTime endTime;
-
-    @NotBlank
-    @Size(max = 120)
+    
+    @NotBlank(message = "Location is required!!")
     private String location;
+    
+    @NotBlank(message = "Appointment type is required!!")
+    private String appointmentType;
+    
+    @NotNull(message = "Date is required!!")
+    private LocalDate date;
+    
+    @NotNull(message = "Start time is required!!")
+    private LocalTime startTime;
+    
+    @NotNull(message = "End time is required!!")
+    private LocalTime endTime;
+    
+    @NotNull(message = "Duration is required!!")
+    private Integer durationMinutes;
 
-    @AssertTrue(message = "End time must be after start time")
-    public boolean isTimeRangeValid() {
-        return startTime != null && endTime != null && endTime.isAfter(startTime);
+    private Integer gapMinutes;
+    
+   @AssertTrue(message = "End time must be after start time")
+    public boolean validateStartandEnd() {
+        if (startTime == null || endTime == null) {
+            return false;
+        }
+        if (endTime.isAfter(startTime)) {
+            return true;
+        }
+        return false;
+    }
+    
+    @AssertTrue(message = "Not enough time in the selected time range for the appointment duration")
+    public boolean validateTimerange() {
+        if (startTime == null || endTime == null || durationMinutes == null || gapMinutes == null) {
+            return true;
+        }
+        
+        long totalMinutes = java.time.Duration.between(startTime, endTime).toMinutes();
+        
+        if (totalMinutes >= durationMinutes) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

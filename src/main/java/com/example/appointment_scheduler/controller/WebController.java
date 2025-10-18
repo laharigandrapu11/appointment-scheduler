@@ -21,7 +21,7 @@ public class WebController {
     public WebController(AppointmentService appointmentService) {
         this.appointmentService = appointmentService;
     }
-
+    
     @ModelAttribute(name = "appointment")
     public Appointment appointment() {
         return new Appointment();
@@ -60,7 +60,7 @@ public class WebController {
     }
     
     @GetMapping("/appointments/schedule")
-    public String createAppointment(Model model, HttpSession session) {
+    public String createAppointments(Model model, HttpSession session) {
         User user = getCurrentUser(session);
         if (user == null) {
             return "redirect:/login";
@@ -71,12 +71,11 @@ public class WebController {
         }
         
         model.addAttribute("user", user);
-        return "create-appointment-prof";
+        return "create-appointments";
     }
     
-    
     @PostMapping("/appointments")
-    public String processAppointment(@Valid Appointment appointment, Errors errors, HttpSession session) {
+    public String processAppointments(@Valid Appointment request, Errors errors, HttpSession session, Model model) {
         User user = getCurrentUser(session);
         if (user == null) {
             return "redirect:/login";
@@ -87,11 +86,14 @@ public class WebController {
         }
         
         if (errors.hasErrors()) {
-            return "create-appointment-prof";
+            model.addAttribute("user", user);
+            return "create-appointments";
         }
         
-        appointmentService.saveAppointment(appointment);
-        return "redirect:/appointments/upcoming";
+        List<Appointment> createdAppointments = appointmentService.createAppointments(request);
+        model.addAttribute("createdCount", createdAppointments.size());
+        model.addAttribute("appointments", createdAppointments);
+        return "appointments-success";
     }
     
     @GetMapping("/appointments/upcoming")
@@ -105,6 +107,12 @@ public class WebController {
         model.addAttribute("appointments", appointments);
         model.addAttribute("user", user);
         return "view-appointments-prof";
+    }
+    
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/login";
     }
     
     private User getCurrentUser(HttpSession session) {

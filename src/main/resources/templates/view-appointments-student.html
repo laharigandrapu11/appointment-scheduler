@@ -7,7 +7,8 @@
   
   <body>
     <h1>View Appointments</h1>
-    <a th:href="@{/}">Home Page</a>
+    <a th:href="@{/}">Home Page</a> | 
+    <a th:href="@{/logout}">Logout</a>
     
     <div th:if="${appointments != null and !appointments.empty}">
       <div th:each="appointment : ${appointments}" class="appointment-card">

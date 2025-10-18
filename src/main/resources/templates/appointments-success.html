@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Appointments Created - Appointment Scheduler</title>
+  </head>
+  
+  <body>
+    <h1>Appointments Created Successfully!</h1>
+    <a th:href="@{/logout}">Logout</a>
+    
+    <div class="success-box">
+      <p>You have successfully created <strong th:text="${createdCount}">0</strong> appointments.</p>
+    </div>
+    
+    <div class="appointment-list">
+      <h3>Created Appointments:</h3>
+      <div th:each="appointment : ${appointments}" class="appointment-item">
+        <div class="appointment-title" th:text="${appointment.title}">Appointment Title</div>
+        <div class="appointment-time">
+          <span th:text="${appointment.date}">Date</span> | 
+          <span th:text="${appointment.startTime}">Start Time</span> - 
+          <span th:text="${appointment.endTime}">End Time</span>
+        </div>
+        <div class="appointment-details">
+          <strong>Type:</strong> <span th:text="${appointment.appointmentType}">Type</span> | 
+          <strong>Location:</strong> <span th:text="${appointment.location}">Location</span>
+        </div>
+        <div class="appointment-details" th:text="${appointment.description}">Description</div>
+      </div>
+    </div>
+    
+    <div>
+      <a th:href="@{/appointments/upcoming}">
+        <button>View All Appointments</button>
+      </a>
+      <a th:href="@{/appointments/schedule}">
+        <button>Create More Appointments</button>
+      </a>
+      <a th:href="@{/}">
+        <button>Home</button>
+      </a>
+    </div>
+
+  </body>
+</html>
