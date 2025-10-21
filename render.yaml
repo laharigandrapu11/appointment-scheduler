@@ -1,6 +1,7 @@
 services:
   - type: web
     name: appointment-scheduler
-    env: docker
+    runtime: docker
     dockerfilePath: ./Dockerfile
     plan: free
+    branch: main
