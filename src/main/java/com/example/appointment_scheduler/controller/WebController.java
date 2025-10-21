@@ -5,10 +5,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.validation.Errors;
 import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpSession;
 import com.example.appointment_scheduler.model.User;
+import com.example.appointment_scheduler.error.AppointmentAlreadyBooked;
+import com.example.appointment_scheduler.error.AppointmentNotFoundException;
 import com.example.appointment_scheduler.model.Appointment;
 import com.example.appointment_scheduler.service.AppointmentService;
 import java.util.List;
@@ -54,8 +57,11 @@ public class WebController {
         }
         
         List<Appointment> appointments = appointmentService.findAll();
+        boolean hasUserBookedAppointment = appointmentService.hasUserBookedAppointment(user);
+        
         model.addAttribute("appointments", appointments);
         model.addAttribute("user", user);
+        model.addAttribute("userHasAppointment", hasUserBookedAppointment);
         return "view-appointments-student";
     }
     
@@ -114,7 +120,27 @@ public class WebController {
         session.invalidate();
         return "redirect:/login";
     }
-    
+
+    @PostMapping("/appointments/book/{id}")
+    public String bookAppointment(@PathVariable int id, HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/login";
+        }
+        
+        try {
+            appointmentService.bookAppointment(id, user);
+            model.addAttribute("successMessage", "Appointment booked successfully!");
+        } catch (AppointmentNotFoundException e) {
+            model.addAttribute("errorMessage", "Appointment not found!");
+        } catch (AppointmentAlreadyBooked e) {
+            model.addAttribute("errorMessage", e.getMessage());
+        }
+        
+        // Redirect back to view appointments
+        return "redirect:/appointments/book";
+    }
+
     private User getCurrentUser(HttpSession session) {
         return (User) session.getAttribute("user");
     }

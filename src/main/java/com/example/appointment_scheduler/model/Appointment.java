@@ -43,6 +43,12 @@ public class Appointment {
     private Integer durationMinutes;
 
     private Integer gapMinutes;
+
+    private boolean isBooked = false;
+    
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User bookedBy;
     
    @AssertTrue(message = "End time must be after start time")
     public boolean validateStartandEnd() {

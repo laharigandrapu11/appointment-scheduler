@@ -4,11 +4,14 @@ package com.example.appointment_scheduler.service;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.appointment_scheduler.error.AppointmentAlreadyBooked;
+import com.example.appointment_scheduler.error.AppointmentNotFoundException;
 import com.example.appointment_scheduler.model.Appointment;
+import com.example.appointment_scheduler.model.User;
 import com.example.appointment_scheduler.repository.AppointmentRepository;
 
 @Service
@@ -73,5 +76,31 @@ public class AppointmentServiceImpl implements AppointmentService {
         return LocalTime.of(newHour, newMinute);
     }
     
+    @Override
+    public Appointment bookAppointment(int appointmentId, User user) throws AppointmentAlreadyBooked, AppointmentNotFoundException {
+        
+        if (hasUserBookedAppointment(user)) {
+            throw new AppointmentAlreadyBooked("You have already booked an appointment");
+        }
+        
+        Optional<Appointment> appointmentOptions = appointmentRepository.findById(appointmentId);
+        if (!appointmentOptions.isPresent()) {
+            throw new AppointmentNotFoundException("Appointment not found!");
+        }
+        
+        Appointment appointment = appointmentOptions.get();
+        if (appointment.isBooked()) {
+            throw new AppointmentAlreadyBooked("Appointment is already booked");
+        }
+        
+        appointment.setBooked(true);
+        appointment.setBookedBy(user);
+        return appointmentRepository.save(appointment);
+    }
+    
+    @Override
+    public boolean hasUserBookedAppointment(User user) {
+        return appointmentRepository.findByBookedBy(user).isPresent();
+    }
 
 }

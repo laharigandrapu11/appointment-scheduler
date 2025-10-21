@@ -10,6 +10,14 @@
     <a th:href="@{/}">Home Page</a> | 
     <a th:href="@{/logout}">Logout</a>
     
+    <div th:if="${successMessage}">
+        <span th:text="${successMessage}">Success message</span>
+    </div>
+    
+    <div th:if="${errorMessage}">
+        <span th:text="${errorMessage}">Error message</span>
+    </div>
+    
     <div th:if="${appointments != null and !appointments.empty}">
       <div th:each="appointment : ${appointments}" class="appointment-card">
         <h3 th:text="${appointment.title}">Appointment Title</h3>
@@ -19,9 +27,31 @@
           <p><strong>Type:</strong> <span th:text="${appointment.appointmentType}">Appointment Type</span></p>
           <p><strong>Location:</strong> <span th:text="${appointment.location}">Location</span></p>
           <p><strong>Description:</strong> <span th:text="${appointment.description}">Description</span></p>
+          <p><strong>Status:</strong> 
+            <span th:if="${appointment.isBooked}" class="status-booked">Booked</span>
+            <span th:unless="${appointment.isBooked}" class="status-available">Available</span>
+          </p>
+        </div>
+        
+        <div th:unless="${appointment.isBooked or userHasAppointment}" class="booking-actions">
+          <form th:action="@{/appointments/book/{id}(id=${appointment.id})}" method="POST" style="display: inline;">
+            <button type="submit">
+              Book Now
+            </button>
+          </form>
+        </div>
+        
+        <div th:if="${appointment.isBooked}" class="booking-actions">
+          <button disabled >
+            Already Booked
+          </button>
         </div>
         
       </div>
+    </div>
+    
+    <div th:if="${userHasAppointment}">
+      <strong>You already have a booked appointment!</strong> Only one appointment per student is allowed.
     </div>
     
     <div th:if="${appointments == null or appointments.empty}">

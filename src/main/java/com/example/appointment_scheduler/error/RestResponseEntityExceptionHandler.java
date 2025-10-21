@@ -27,9 +27,9 @@ public class RestResponseEntityExceptionHandler
         @ExceptionHandler(UserAlreadyExistsException.class)
         public ResponseEntity<ErrorMessage> userAlreadyExistsException(UserAlreadyExistsException ex, WebRequest request) {
             ErrorMessage message 
-                = new ErrorMessage(HttpStatus.NOT_ACCEPTABLE, ex.getMessage());
+                = new ErrorMessage(HttpStatus.CONFLICT, ex.getMessage());
 
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(message);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(message);
         }
 
         @ExceptionHandler(IncorrectPasswordException.class)
@@ -38,5 +38,21 @@ public class RestResponseEntityExceptionHandler
                 = new ErrorMessage(HttpStatus.UNAUTHORIZED, ex.getMessage());
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(message);
+        }
+
+        @ExceptionHandler(AppointmentNotFoundException.class)
+        public ResponseEntity<ErrorMessage> appointmentNotFoundException(AppointmentNotFoundException ex, WebRequest request) {
+            ErrorMessage message 
+                = new ErrorMessage(HttpStatus.NOT_FOUND, ex.getMessage());      
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
+
+        }
+
+        @ExceptionHandler(AppointmentAlreadyBooked.class)
+        public ResponseEntity<ErrorMessage> appointmentAlreadyBookedException(AppointmentAlreadyBooked ex, WebRequest request) {
+            ErrorMessage message 
+                = new ErrorMessage(HttpStatus.CONFLICT, ex.getMessage());      
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(message);
+
         }
 }

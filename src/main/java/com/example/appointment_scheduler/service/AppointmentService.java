@@ -1,12 +1,17 @@
 package com.example.appointment_scheduler.service;
 import java.util.List;
 
+import com.example.appointment_scheduler.error.AppointmentAlreadyBooked;
+import com.example.appointment_scheduler.error.AppointmentNotFoundException;
 import com.example.appointment_scheduler.model.Appointment;
+import com.example.appointment_scheduler.model.User;
 
 public interface AppointmentService {
    
    public List<Appointment> findAll();
    public List<Appointment> createAppointments(Appointment appointment);
+   public Appointment bookAppointment(int appointmentId, User user) throws AppointmentNotFoundException, AppointmentAlreadyBooked;
+   public boolean hasUserBookedAppointment(User user);
     
 }
 
