@@ -1,14 +1,13 @@
-FROM openjdk:17-jdk-slim
-
+FROM maven:3.8.6-openjdk-17 AS build
 WORKDIR /app
-
-COPY mvnw mvnw.cmd pom.xml ./
-COPY .mvn .mvn
-RUN chmod +x ./mvnw
-
+COPY pom.xml .
 COPY src ./src
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
+
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8081
 
-CMD ["java", "-jar", "target/appointment-scheduler-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-jar", "app.jar"]
