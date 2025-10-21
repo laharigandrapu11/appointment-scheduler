@@ -51,7 +51,7 @@
     </div>
     
     <div th:if="${userHasAppointment}">
-      <strong>You already have a booked appointment!</strong> Only one appointment per student is allowed.
+      <p>You already have a booked appointment!</p>
     </div>
     
     <div th:if="${appointments == null or appointments.empty}">
