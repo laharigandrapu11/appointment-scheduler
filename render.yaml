@@ -3,3 +3,4 @@ services:
     name: appointment-scheduler
     env: docker
     dockerfilePath: ./Dockerfile
+    plan: free
