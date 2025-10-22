@@ -2,6 +2,7 @@ package com.example.appointment_scheduler.model;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -45,6 +46,12 @@ public class Appointment {
     private Integer gapMinutes;
 
     private boolean isBooked = false;
+
+    private String groupId;
+    private String scheduleType; 
+    
+    @Transient
+    private List<DaySchedule> daySchedule; 
     
     @ManyToOne
     @JoinColumn(name = "user_id")

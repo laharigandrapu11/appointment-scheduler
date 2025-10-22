@@ -31,36 +31,18 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public List<Appointment> createAppointments(Appointment app) {
         List<Appointment> appointments = new ArrayList<>();
+        String groupId = java.util.UUID.randomUUID().toString();
         
-        LocalTime currentStartTime = app.getStartTime();
-        int appointmentNumber = 1;
-        
-        while (true) {
-            LocalTime appointmentEndTime = addMinutesToTime(currentStartTime, app.getDurationMinutes());
-            if (appointmentEndTime.isAfter(app.getEndTime())) {
-                break; 
-            }
+        if(app.getDaySchedule() != null && app.getScheduleType().equalsIgnoreCase("single")){
+            appointments = createSingleDayAppointments(app, groupId);
+        } else if (app.getDaySchedule() != null && app.getScheduleType().equalsIgnoreCase("multiple")) {
+            appointments = createMultipleDaysAppointments(app, groupId);
+        }
+        return appointments;
 
-            Appointment appointment = new Appointment();
-            appointment.setTitle(app.getTitle() + " - Slot " + appointmentNumber);
-            appointment.setDescription(app.getDescription());
-            appointment.setAppointmentType(app.getAppointmentType());
-            appointment.setDate(app.getDate());
-            appointment.setStartTime(currentStartTime);
-            appointment.setEndTime(appointmentEndTime);
-            appointment.setLocation(app.getLocation());
-            appointment.setDurationMinutes(app.getDurationMinutes());
-            appointment.setGapMinutes(app.getGapMinutes());
-            
-            appointments.add(appointmentRepository.save(appointment));
-            
-            int totalMinutes = app.getDurationMinutes() + app.getGapMinutes();
-            currentStartTime = addMinutesToTime(currentStartTime, totalMinutes);
-            appointmentNumber++;
         }
         
-        return appointments;
-    }
+
     
     private LocalTime addMinutesToTime(LocalTime time, int minutesToAdd) {
         int totalMinutes = time.getHour() * 60 + time.getMinute();
@@ -76,6 +58,65 @@ public class AppointmentServiceImpl implements AppointmentService {
         return LocalTime.of(newHour, newMinute);
     }
     
+    private List<Appointment> createSingleDayAppointments(Appointment app, String groupId) {
+        List<Appointment> appointments = new ArrayList<>();
+        LocalTime currentStartTime = app.getStartTime();
+        LocalTime endTime = app.getEndTime();
+        int duration = app.getDurationMinutes();
+        int gap = app.getGapMinutes() != null ? app.getGapMinutes() : 0;
+        
+        while (currentStartTime.plusMinutes(duration).isBefore(endTime) || currentStartTime.plusMinutes(duration).equals(endTime)) {
+            Appointment newApp = new Appointment();
+            newApp.setTitle(app.getTitle());
+            newApp.setDescription(app.getDescription());
+            newApp.setLocation(app.getLocation());
+            newApp.setAppointmentType(app.getAppointmentType());
+            newApp.setDate(app.getDate());
+            newApp.setStartTime(currentStartTime);
+            newApp.setEndTime(currentStartTime.plusMinutes(duration));
+            newApp.setDurationMinutes(duration);
+            newApp.setGapMinutes(gap);
+            newApp.setGroupId(groupId);
+            newApp.setScheduleType("single");
+            appointments.add(appointmentRepository.save(newApp));
+            
+            currentStartTime = addMinutesToTime(currentStartTime.plusMinutes(duration), gap);
+        }
+        
+        return appointments;
+    }
+
+    private List<Appointment> createMultipleDaysAppointments(Appointment app, String groupId) {
+        List<Appointment> appointments = new ArrayList<>();
+        
+        for (var daySchedule : app.getDaySchedule()) {
+            LocalTime currentStartTime = daySchedule.getStartTime();
+            LocalTime endTime = daySchedule.getEndTime();
+            int duration = app.getDurationMinutes();
+            int gap = app.getGapMinutes() != null ? app.getGapMinutes() : 0;
+            
+            while (currentStartTime.plusMinutes(duration).isBefore(endTime) || currentStartTime.plusMinutes(duration).equals(endTime)) {
+                Appointment newApp = new Appointment();
+                newApp.setTitle(app.getTitle());
+                newApp.setDescription(app.getDescription());
+                newApp.setLocation(app.getLocation());
+                newApp.setAppointmentType(app.getAppointmentType());
+                newApp.setDate(daySchedule.getDate());
+                newApp.setStartTime(currentStartTime);
+                newApp.setEndTime(currentStartTime.plusMinutes(duration));
+                newApp.setDurationMinutes(duration);
+                newApp.setGapMinutes(gap);
+                newApp.setGroupId(groupId);
+                newApp.setScheduleType("multiple");
+                appointments.add(appointmentRepository.save(newApp));
+                
+                currentStartTime = addMinutesToTime(currentStartTime.plusMinutes(duration), gap);
+            }
+        }
+        
+        return appointments;
+    }
+
     @Override
     public Appointment bookAppointment(int appointmentId, User user) throws AppointmentAlreadyBooked, AppointmentNotFoundException {
         
