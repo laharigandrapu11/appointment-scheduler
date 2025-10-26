@@ -10,6 +10,7 @@
     
     <div th:if="${user != null}">
       <h2>Hi, <span th:text="${user.username}">User</span>!</h2>
+      <p><a th:href="@{/logout}">Logout</a></p>
       
       <div th:if="${user.role == 'STUDENT' or user.role == 'TA'}">
         <div class="grid">
@@ -35,7 +36,7 @@
     </div>
 
     <div th:if="${user == null}">
-      <h3>Please log in/register to access!</h3>
+      <h3>Please log in or register to access!</h3>
       <div>
         <a th:href="@{/login}">Login</a> | 
         <a th:href="@{/register}">Register</a>

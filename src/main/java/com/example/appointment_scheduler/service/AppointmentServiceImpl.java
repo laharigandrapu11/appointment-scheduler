@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.example.appointment_scheduler.error.AppointmentAlreadyBooked;
 import com.example.appointment_scheduler.error.AppointmentNotFoundException;
 import com.example.appointment_scheduler.model.Appointment;
+import com.example.appointment_scheduler.model.DaySchedule;
 import com.example.appointment_scheduler.model.User;
 import com.example.appointment_scheduler.repository.AppointmentRepository;
 
@@ -31,16 +32,37 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public List<Appointment> createAppointments(Appointment app) {
         List<Appointment> appointments = new ArrayList<>();
-        String groupId = java.util.UUID.randomUUID().toString();
+        String appGroupId = java.util.UUID.randomUUID().toString();
+        List<DaySchedule> validDaySchedules = new ArrayList<>();
         
-        if(app.getDaySchedule() != null && app.getScheduleType().equalsIgnoreCase("single")){
-            appointments = createSingleDayAppointments(app, groupId);
-        } else if (app.getDaySchedule() != null && app.getScheduleType().equalsIgnoreCase("multiple")) {
-            appointments = createMultipleDaysAppointments(app, groupId);
+        if (app.getDaySchedule() != null) {
+            for (DaySchedule daySchedule : app.getDaySchedule()) {
+                if (daySchedule != null && 
+                    daySchedule.getDate() != null && 
+                    daySchedule.getStartTime() != null && 
+                    daySchedule.getEndTime() != null) {
+                    
+                    validDaySchedules.add(daySchedule);
+                }
+            }
+        }
+        
+        if (validDaySchedules.isEmpty()) {
+            appointments = createSingleDayAppointments(app, appGroupId);
+        } else {
+            DaySchedule firstDay = new DaySchedule();
+            firstDay.setDate(app.getDate());
+            firstDay.setStartTime(app.getStartTime());
+            firstDay.setEndTime(app.getEndTime());
+            
+            validDaySchedules.add(0, firstDay);
+            
+            app.setDaySchedule(validDaySchedules);
+            
+            appointments = createMultipleDaysAppointments(app, appGroupId);
         }
         return appointments;
-
-        }
+    }
         
 
     
@@ -64,10 +86,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         LocalTime endTime = app.getEndTime();
         int duration = app.getDurationMinutes();
         int gap = app.getGapMinutes() != null ? app.getGapMinutes() : 0;
+        int slotNumber = 1;
         
         while (currentStartTime.plusMinutes(duration).isBefore(endTime) || currentStartTime.plusMinutes(duration).equals(endTime)) {
             Appointment newApp = new Appointment();
-            newApp.setTitle(app.getTitle());
+            newApp.setTitle(app.getTitle() + " - Slot " + slotNumber);
             newApp.setDescription(app.getDescription());
             newApp.setLocation(app.getLocation());
             newApp.setAppointmentType(app.getAppointmentType());
@@ -81,6 +104,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             appointments.add(appointmentRepository.save(newApp));
             
             currentStartTime = addMinutesToTime(currentStartTime.plusMinutes(duration), gap);
+            slotNumber++;
         }
         
         return appointments;
@@ -88,6 +112,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     private List<Appointment> createMultipleDaysAppointments(Appointment app, String groupId) {
         List<Appointment> appointments = new ArrayList<>();
+        int slotNumber = 1;
         
         for (var daySchedule : app.getDaySchedule()) {
             LocalTime currentStartTime = daySchedule.getStartTime();
@@ -97,7 +122,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             
             while (currentStartTime.plusMinutes(duration).isBefore(endTime) || currentStartTime.plusMinutes(duration).equals(endTime)) {
                 Appointment newApp = new Appointment();
-                newApp.setTitle(app.getTitle());
+                newApp.setTitle(app.getTitle() + " - Slot " + slotNumber);
                 newApp.setDescription(app.getDescription());
                 newApp.setLocation(app.getLocation());
                 newApp.setAppointmentType(app.getAppointmentType());
@@ -111,6 +136,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 appointments.add(appointmentRepository.save(newApp));
                 
                 currentStartTime = addMinutesToTime(currentStartTime.plusMinutes(duration), gap);
+                slotNumber++;
             }
         }
         

@@ -1,9 +1,12 @@
+com/example/appointment_scheduler/error/AppointmentNotFoundException.class
 com/example/appointment_scheduler/service/UserServiceImpl.class
+com/example/appointment_scheduler/model/DaySchedule.class
 com/example/appointment_scheduler/controller/UserController.class
 com/example/appointment_scheduler/model/Login.class
 com/example/appointment_scheduler/repository/AppointmentRepository.class
 com/example/appointment_scheduler/AppointmentSchedulerApplication.class
 com/example/appointment_scheduler/error/IncorrectPasswordException.class
+com/example/appointment_scheduler/error/AppointmentAlreadyBooked.class
 com/example/appointment_scheduler/repository/UserRepository.class
 com/example/appointment_scheduler/service/UserService.class
 com/example/appointment_scheduler/model/User.class

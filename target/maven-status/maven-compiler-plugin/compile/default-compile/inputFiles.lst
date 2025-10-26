@@ -1,11 +1,14 @@
 /workspaces/appointment-scheduler/src/main/java/com/example/appointment_scheduler/AppointmentSchedulerApplication.java
 /workspaces/appointment-scheduler/src/main/java/com/example/appointment_scheduler/controller/UserController.java
 /workspaces/appointment-scheduler/src/main/java/com/example/appointment_scheduler/controller/WebController.java
+/workspaces/appointment-scheduler/src/main/java/com/example/appointment_scheduler/error/AppointmentAlreadyBooked.java
+/workspaces/appointment-scheduler/src/main/java/com/example/appointment_scheduler/error/AppointmentNotFoundException.java
 /workspaces/appointment-scheduler/src/main/java/com/example/appointment_scheduler/error/IncorrectPasswordException.java
 /workspaces/appointment-scheduler/src/main/java/com/example/appointment_scheduler/error/RestResponseEntityExceptionHandler.java
 /workspaces/appointment-scheduler/src/main/java/com/example/appointment_scheduler/error/UserAlreadyExistsException.java
 /workspaces/appointment-scheduler/src/main/java/com/example/appointment_scheduler/error/UserNotFoundException.java
 /workspaces/appointment-scheduler/src/main/java/com/example/appointment_scheduler/model/Appointment.java
+/workspaces/appointment-scheduler/src/main/java/com/example/appointment_scheduler/model/DaySchedule.java
 /workspaces/appointment-scheduler/src/main/java/com/example/appointment_scheduler/model/ErrorMessage.java
 /workspaces/appointment-scheduler/src/main/java/com/example/appointment_scheduler/model/Login.java
 /workspaces/appointment-scheduler/src/main/java/com/example/appointment_scheduler/model/User.java
