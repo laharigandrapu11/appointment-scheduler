@@ -13,6 +13,14 @@
         <a th:href="@{/logout}">Logout</a>
       </div>
       
+      <div th:if="${successMessage}">
+        <strong>Success:</strong> <span th:text="${successMessage}">Success message</span>
+      </div>
+      
+      <div th:if="${errorMessage}">
+        <strong>Error:</strong> <span th:text="${errorMessage}">Error message</span>
+      </div>
+      
       <div th:if="${appointments != null and !appointments.empty}">
         <div th:each="appointment : ${appointments}">
           <div>
@@ -24,6 +32,13 @@
             <p><strong>Status:</strong> <span th:text="${appointment.isBooked ? 'Booked' : 'Available'}">Status</span></p>
             <p th:if="${appointment.isBooked and appointment.bookedBy != null}"><strong>Booked by:</strong> <span th:text="${appointment.bookedBy.username}">Student Username</span></p>
             <p><strong>Description:</strong> <span th:text="${appointment.description}">Description</span></p>
+            <div th:if="${appointment.isBooked}" class="booking-actions">
+              <form th:action="@{/appointments/cancel/{id}(id=${appointment.id})}" method="POST" style="display: inline;">
+                <button type="submit">
+                  Cancel Appointment
+                </button>
+              </form>
+            </div>
             <hr>
           </div>
         </div>

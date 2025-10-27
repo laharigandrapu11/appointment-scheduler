@@ -1,6 +1,8 @@
 package com.example.appointment_scheduler.service;
 
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +10,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.appointment_scheduler.error.AppointmentAlreadyBooked;
+import com.example.appointment_scheduler.error.AppointmentAlreadyBookedException;
+import com.example.appointment_scheduler.error.CancelAppointmentException;
 import com.example.appointment_scheduler.error.AppointmentNotFoundException;
 import com.example.appointment_scheduler.model.Appointment;
 import com.example.appointment_scheduler.model.DaySchedule;
@@ -89,6 +92,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         int slotNumber = 1;
         
         while (currentStartTime.plusMinutes(duration).isBefore(endTime) || currentStartTime.plusMinutes(duration).equals(endTime)) {
+            LocalTime appointmentEndTime = currentStartTime.plusMinutes(duration);
+            if (appointmentEndTime.isBefore(currentStartTime)) {
+                break;
+            }
+            
             Appointment newApp = new Appointment();
             newApp.setTitle(app.getTitle() + " - Slot " + slotNumber);
             newApp.setDescription(app.getDescription());
@@ -96,14 +104,18 @@ public class AppointmentServiceImpl implements AppointmentService {
             newApp.setAppointmentType(app.getAppointmentType());
             newApp.setDate(app.getDate());
             newApp.setStartTime(currentStartTime);
-            newApp.setEndTime(currentStartTime.plusMinutes(duration));
+            newApp.setEndTime(appointmentEndTime);
             newApp.setDurationMinutes(duration);
             newApp.setGapMinutes(gap);
             newApp.setGroupId(groupId);
             newApp.setScheduleType("single");
             appointments.add(appointmentRepository.save(newApp));
             
-            currentStartTime = addMinutesToTime(currentStartTime.plusMinutes(duration), gap);
+            LocalTime nextStartTime = currentStartTime.plusMinutes(duration + gap);
+            if (nextStartTime.isBefore(currentStartTime)) {
+                break;
+            }
+            currentStartTime = nextStartTime;
             slotNumber++;
         }
         
@@ -121,6 +133,11 @@ public class AppointmentServiceImpl implements AppointmentService {
             int gap = app.getGapMinutes() != null ? app.getGapMinutes() : 0;
             
             while (currentStartTime.plusMinutes(duration).isBefore(endTime) || currentStartTime.plusMinutes(duration).equals(endTime)) {
+                LocalTime appointmentEndTime = currentStartTime.plusMinutes(duration);
+                if (appointmentEndTime.isBefore(currentStartTime)) {
+                    break;
+                }
+                
                 Appointment newApp = new Appointment();
                 newApp.setTitle(app.getTitle() + " - Slot " + slotNumber);
                 newApp.setDescription(app.getDescription());
@@ -128,14 +145,18 @@ public class AppointmentServiceImpl implements AppointmentService {
                 newApp.setAppointmentType(app.getAppointmentType());
                 newApp.setDate(daySchedule.getDate());
                 newApp.setStartTime(currentStartTime);
-                newApp.setEndTime(currentStartTime.plusMinutes(duration));
+                newApp.setEndTime(appointmentEndTime);
                 newApp.setDurationMinutes(duration);
                 newApp.setGapMinutes(gap);
                 newApp.setGroupId(groupId);
                 newApp.setScheduleType("multiple");
                 appointments.add(appointmentRepository.save(newApp));
                 
-                currentStartTime = addMinutesToTime(currentStartTime.plusMinutes(duration), gap);
+                LocalTime nextStartTime = currentStartTime.plusMinutes(duration + gap);
+                if (nextStartTime.isBefore(currentStartTime)) {
+                    break;
+                }
+                currentStartTime = nextStartTime;
                 slotNumber++;
             }
         }
@@ -144,10 +165,10 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public Appointment bookAppointment(int appointmentId, User user) throws AppointmentAlreadyBooked, AppointmentNotFoundException {
+    public Appointment bookAppointment(int appointmentId, User user) throws AppointmentAlreadyBookedException, AppointmentNotFoundException {
         
         if (hasUserBookedAppointment(user)) {
-            throw new AppointmentAlreadyBooked("You have already booked an appointment");
+            throw new AppointmentAlreadyBookedException("You have already booked an appointment");
         }
         
         Optional<Appointment> appointmentOptions = appointmentRepository.findById(appointmentId);
@@ -157,7 +178,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         
         Appointment appointment = appointmentOptions.get();
         if (appointment.isBooked()) {
-            throw new AppointmentAlreadyBooked("Appointment is already booked");
+            throw new AppointmentAlreadyBookedException("Appointment is already booked");
         }
         
         appointment.setBooked(true);
@@ -170,4 +191,53 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointmentRepository.findByBookedBy(user).isPresent();
     }
 
+    @Override
+    public void cancelAppointment(int appointmentId, User user) throws AppointmentNotFoundException, CancelAppointmentException {
+        Optional<Appointment> appointmentOptional = appointmentRepository.findById(appointmentId);
+        
+        if (!appointmentOptional.isPresent()) {
+            throw new AppointmentNotFoundException("Appointment not found!!");
+        }
+        Appointment appointment = appointmentOptional.get();
+        String userRole = user.getRole();
+        if (userRole.equals("PROFESSOR")) {
+            cancelAppointmentSlot(appointment);
+        
+        } 
+        else if (userRole.equals("STUDENT")) {
+            User bookedByUser = appointment.getBookedBy();
+            if (bookedByUser == null || bookedByUser.getId() != user.getId()) {
+                throw new CancelAppointmentException("You can only cancel appointments that you have booked!");
+            }
+            boolean canCancel = canStudentCancel(appointment);
+            if (!canCancel) {
+                throw new CancelAppointmentException("You can only cancel before the first appointment in the group!");
+            }
+            cancelAppointmentSlot(appointment);
+            
+        } else {
+            throw new CancelAppointmentException("Invalid user role!");
+        }
+    }
+
+    private boolean canStudentCancel(Appointment appointment) {
+        String groupId = appointment.getGroupId();
+        List<Appointment> groupAppointments = appointmentRepository.findByGroupIdOrderByDateAscStartTimeAsc(groupId);
+        
+        if (groupAppointments.isEmpty()) {
+            return true;
+        }
+        Appointment firstAppointment = groupAppointments.get(0);
+        LocalDateTime currentTime = LocalDateTime.now();
+        LocalDate firstDate = firstAppointment.getDate();
+        LocalTime firstTime = firstAppointment.getStartTime();
+        LocalDateTime firstAppointmentDateTime = LocalDateTime.of(firstDate, firstTime);
+        return currentTime.isBefore(firstAppointmentDateTime);
+    }
+
+    private void cancelAppointmentSlot(Appointment appointment) {
+        appointment.setBooked(false);
+        appointment.setBookedBy(null);
+        appointmentRepository.save(appointment);
+    }
 }

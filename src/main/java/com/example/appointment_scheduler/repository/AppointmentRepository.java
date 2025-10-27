@@ -1,6 +1,7 @@
 package com.example.appointment_scheduler.repository;
 import com.example.appointment_scheduler.model.Appointment;
 import com.example.appointment_scheduler.model.User;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +12,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Intege
     //save, delete, findAll are provided by JpaRepository
     Optional<Appointment> findById(int id);
     Optional<Appointment> findByBookedBy(User user);
+    List<Appointment> findByGroupIdOrderByDateAscStartTimeAsc(String groupId);
     
 
     

@@ -6,11 +6,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.validation.Errors;
 import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpSession;
 import com.example.appointment_scheduler.model.User;
-import com.example.appointment_scheduler.error.AppointmentAlreadyBooked;
+import com.example.appointment_scheduler.error.AppointmentAlreadyBookedException;
+import com.example.appointment_scheduler.error.CancelAppointmentException;
 import com.example.appointment_scheduler.error.AppointmentNotFoundException;
 import com.example.appointment_scheduler.model.Appointment;
 import com.example.appointment_scheduler.service.AppointmentService;
@@ -122,25 +124,54 @@ public class WebController {
     }
 
     @PostMapping("/appointments/book/{id}")
-    public String bookAppointment(@PathVariable int id, HttpSession session, Model model) {
+    public String bookAppointment(@PathVariable int id, HttpSession session, RedirectAttributes redirectAttributes) {
         User user = (User) session.getAttribute("user");
+        
         if (user == null) {
             return "redirect:/login";
         }
         
         try {
             appointmentService.bookAppointment(id, user);
-            model.addAttribute("successMessage", "Appointment booked successfully!");
+            redirectAttributes.addFlashAttribute("successMessage", "Appointment booked successfully!");
+            
         } catch (AppointmentNotFoundException e) {
-            model.addAttribute("errorMessage", "Appointment not found!");
-        } catch (AppointmentAlreadyBooked e) {
-            model.addAttribute("errorMessage", e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Appointment not found!");
+            
+        } catch (AppointmentAlreadyBookedException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         
-        // Redirect back to view appointments
         return "redirect:/appointments/book";
     }
 
+    @PostMapping("/appointments/cancel/{id}")
+    public String cancelAppointment(@PathVariable int id, HttpSession session, RedirectAttributes redirectAttributes) {
+        User user = (User) session.getAttribute("user");
+        
+        if (user == null) {
+            return "redirect:/login";
+        }
+        
+        try {
+            appointmentService.cancelAppointment(id, user);
+            redirectAttributes.addFlashAttribute("successMessage", "Appointment cancelled successfully!");
+            
+        } catch (AppointmentNotFoundException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Appointment not found!");
+            
+        } catch (CancelAppointmentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        
+        String userRole = user.getRole();
+        
+        if (userRole.equals("PROFESSOR")) {
+            return "redirect:/appointments/upcoming";
+        } else {
+            return "redirect:/appointments/book";
+        }
+    }
     private User getCurrentUser(HttpSession session) {
         return (User) session.getAttribute("user");
     }

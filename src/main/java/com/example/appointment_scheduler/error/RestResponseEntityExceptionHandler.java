@@ -48,11 +48,19 @@ public class RestResponseEntityExceptionHandler
 
         }
 
-        @ExceptionHandler(AppointmentAlreadyBooked.class)
-        public ResponseEntity<ErrorMessage> appointmentAlreadyBookedException(AppointmentAlreadyBooked ex, WebRequest request) {
+        @ExceptionHandler(AppointmentAlreadyBookedException.class)
+        public ResponseEntity<ErrorMessage> appointmentAlreadyBookedException(AppointmentAlreadyBookedException ex, WebRequest request) {
             ErrorMessage message 
                 = new ErrorMessage(HttpStatus.CONFLICT, ex.getMessage());      
             return ResponseEntity.status(HttpStatus.CONFLICT).body(message);
+
+        }
+
+        @ExceptionHandler(CancelAppointmentException.class)
+        public ResponseEntity<ErrorMessage> cancelAppointmentException(CancelAppointmentException ex, WebRequest request) {
+            ErrorMessage message 
+                = new ErrorMessage(HttpStatus.FORBIDDEN, ex.getMessage());      
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(message);
 
         }
 }
