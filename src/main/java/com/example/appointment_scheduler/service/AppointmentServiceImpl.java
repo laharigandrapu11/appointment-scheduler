@@ -69,19 +69,19 @@ public class AppointmentServiceImpl implements AppointmentService {
         
 
     
-    private LocalTime addMinutesToTime(LocalTime time, int minutesToAdd) {
-        int totalMinutes = time.getHour() * 60 + time.getMinute();
-        totalMinutes = totalMinutes + minutesToAdd;
+    // private LocalTime addMinutesToTime(LocalTime time, int minutesToAdd) {
+    //     int totalMinutes = time.getHour() * 60 + time.getMinute();
+    //     totalMinutes = totalMinutes + minutesToAdd;
         
-        int newHour = totalMinutes / 60;
-        int newMinute = totalMinutes % 60;
+    //     int newHour = totalMinutes / 60;
+    //     int newMinute = totalMinutes % 60;
         
-        if (newHour >= 24) {
-            newHour = newHour % 24;
-        }
+    //     if (newHour >= 24) {
+    //         newHour = newHour % 24;
+    //     }
         
-        return LocalTime.of(newHour, newMinute);
-    }
+    //     return LocalTime.of(newHour, newMinute);
+    // }
     
     private List<Appointment> createSingleDayAppointments(Appointment app, String groupId) {
         List<Appointment> appointments = new ArrayList<>();

@@ -45,6 +45,13 @@ public class AppointmentSchedulerApplication {
 			student2.setPassword("password");
 			student2.setRole("STUDENT");
 			userRepository.save(student2);
+
+			User ta1 = new User();
+			ta1.setUsername("TA 1");
+			ta1.setEmail("ta@gmail.com");
+			ta1.setPassword("password");
+			ta1.setRole("TA");
+			userRepository.save(ta1);
 			
 			
 			System.out.println("loaded dummy data successfully!!!");

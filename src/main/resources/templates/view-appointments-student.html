@@ -31,31 +31,39 @@
             <span th:if="${appointment.isBooked}" class="status-booked">Booked</span>
             <span th:unless="${appointment.isBooked}" class="status-available">Available</span>
           </p>
+          <p th:if="${user.role == 'TA' and appointment.isBooked and appointment.bookedBy != null}">
+            <strong>Booked By:</strong> <span th:text="${appointment.bookedBy.username}">Student Name</span>
+          </p>
         </div>
         
-        <div th:unless="${appointment.isBooked or userHasAppointment}" class="booking-actions">
-          <form th:action="@{/appointments/book/{id}(id=${appointment.id})}" method="POST" style="display: inline;">
-            <button type="submit">
-              Book Now
+        <div th:if="${user.role == 'STUDENT'}">
+          <div th:unless="${appointment.isBooked or userHasAppointment}" class="booking-actions">
+            <form th:action="@{/appointments/book/{id}(id=${appointment.id})}" method="POST" style="display: inline;">
+              <button type="submit">
+                Book Now
+              </button>
+            </form>
+          </div>
+          
+          <div th:if="${appointment.isBooked and appointment.bookedBy != null and appointment.bookedBy.id == user.id}" class="booking-actions">
+            <button disabled>
+              Booked by You
             </button>
-          </form>
-        </div>
-        
-        <div th:if="${appointment.isBooked and appointment.bookedBy != null and appointment.bookedBy.id == user.id}" class="booking-actions">
-          <button disabled>
-            Booked by You
-          </button>
-          <form th:action="@{/appointments/cancel/{id}(id=${appointment.id})}" method="POST" style="display: inline;">
-            <button type="submit">
-              Cancel
+            <form th:action="@{/appointments/cancel/{id}(id=${appointment.id})}" method="POST" style="display: inline;">
+              <button type="submit">
+                Cancel
+              </button>
+            </form>
+          </div>
+          
+          <div th:if="${appointment.isBooked and (appointment.bookedBy == null or appointment.bookedBy.id != user.id)}" class="booking-actions">
+            <button disabled >
+              Already Booked
             </button>
-          </form>
+          </div>
         </div>
-        
-        <div th:if="${appointment.isBooked and (appointment.bookedBy == null or appointment.bookedBy.id != user.id)}" class="booking-actions">
-          <button disabled >
-            Already Booked
-          </button>
+        <div th:if="${user.role == 'TA'}" class="booking-actions">
+          <p><em>(TA cannot cancel/book. You can only view!)</em></p>
         </div>
         
       </div>
