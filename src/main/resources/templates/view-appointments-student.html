@@ -28,8 +28,9 @@
           <p><strong>Location:</strong> <span th:text="${appointment.location}">Location</span></p>
           <p><strong>Description:</strong> <span th:text="${appointment.description}">Description</span></p>
           <p><strong>Status:</strong> 
-            <span th:if="${appointment.isBooked}" class="status-booked">Booked</span>
-            <span th:unless="${appointment.isBooked}" class="status-available">Available</span>
+            <span th:if="${!appointment.isActive}">Disabled by Professor</span>
+            <span th:if="${appointment.isActive and appointment.isBooked}" class="status-booked">Booked</span>
+            <span th:if="${appointment.isActive and !appointment.isBooked}" class="status-available">Available</span>
           </p>
           <p th:if="${user.role == 'TA' and appointment.isBooked and appointment.bookedBy != null}">
             <strong>Booked By:</strong> <span th:text="${appointment.bookedBy.username}">Student Name</span>
@@ -37,12 +38,18 @@
         </div>
         
         <div th:if="${user.role == 'STUDENT'}">
-          <div th:unless="${appointment.isBooked}" class="booking-actions">
+          <div th:if="${appointment.isActive and !appointment.isBooked}" class="booking-actions">
             <form th:action="@{/appointments/book/{id}(id=${appointment.id})}" method="POST" style="display: inline;">
               <button type="submit">
                 Book Now
               </button>
             </form>
+          </div>
+          
+          <div th:if="${!appointment.isActive}" class="booking-actions">
+            <button disabled>
+              Disabled
+            </button>
           </div>
           
           <div th:if="${appointment.isBooked and appointment.bookedBy != null and appointment.bookedBy.id == user.id}" class="booking-actions">

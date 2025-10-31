@@ -170,6 +170,32 @@ public class WebController {
             return "redirect:/appointments/book";
         }
     }
+
+    @PostMapping("/appointments/toggle/{groupId}")
+    public String toggleAppointmentGroup(@PathVariable String groupId, HttpSession session, RedirectAttributes redirectAttributes) {
+        User currentUser = (User) session.getAttribute("user");
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+        String userRole = currentUser.getRole();
+        if (userRole.equals("PROFESSOR") == false) {
+            return "redirect:/";
+        }
+        List<Appointment> allAppointments = appointmentService.findAll();
+        for (int i = 0; i < allAppointments.size(); i++) {
+            Appointment appointment = allAppointments.get(i);
+            String appointmentGroupId = appointment.getGroupId();
+            if (appointmentGroupId.equals(groupId) == true) {
+                boolean currentStatus = appointment.isActive();
+                boolean newStatus = !currentStatus;
+                appointment.setActive(newStatus);
+                appointmentService.saveAppointment(appointment);
+            }
+        }
+        redirectAttributes.addFlashAttribute("successMessage", "Appointment group status updated!");
+        return "redirect:/appointments/upcoming";
+    }
+    
     private User getCurrentUser(HttpSession session) {
         return (User) session.getAttribute("user");
     }

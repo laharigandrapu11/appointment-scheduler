@@ -29,13 +29,24 @@
             <p><strong>Time:</strong> <span th:text="${appointment.startTime}">Start Time</span> - <span th:text="${appointment.endTime}">End Time</span></p>
             <p><strong>Type:</strong> <span th:text="${appointment.appointmentType}">Appointment Type</span></p>
             <p><strong>Location:</strong> <span th:text="${appointment.location}">Location</span></p>
-            <p><strong>Status:</strong> <span th:text="${appointment.isBooked ? 'Booked' : 'Available'}">Status</span></p>
+            <p><strong>Group Status:</strong> 
+              <span th:if="${appointment.isActive}" >Active</span>
+              <span th:unless="${appointment.isActive}" >Disabled</span>
+            </p>
+            <p><strong>Slot Status:</strong> <span th:text="${appointment.isBooked ? 'Booked' : 'Available'}">Status</span></p>
             <p th:if="${appointment.isBooked and appointment.bookedBy != null}"><strong>Booked by:</strong> <span th:text="${appointment.bookedBy.username}">Student Username</span></p>
             <p><strong>Description:</strong> <span th:text="${appointment.description}">Description</span></p>
-            <div th:if="${appointment.isBooked}" class="booking-actions">
-              <form th:action="@{/appointments/cancel/{id}(id=${appointment.id})}" method="POST" style="display: inline;">
+            
+            <div class="booking-actions">
+              <form th:action="@{/appointments/toggle/{groupId}(groupId=${appointment.groupId})}" method="POST" style="display: inline;">
+                <button type="submit" th:text="${appointment.isActive ? 'Disable Group' : 'Enable Group'}">
+                  Toggle Group
+                </button>
+              </form>
+              
+              <form th:if="${appointment.isBooked}" th:action="@{/appointments/cancel/{id}(id=${appointment.id})}" method="POST" style="display: inline;">
                 <button type="submit">
-                  Cancel Appointment
+                  Cancel This Slot
                 </button>
               </form>
             </div>

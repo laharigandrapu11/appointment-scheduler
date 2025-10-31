@@ -44,9 +44,8 @@ public class Appointment {
     private Integer durationMinutes;
 
     private Integer gapMinutes;
-
     private boolean isBooked = false;
-
+    private boolean isActive = true; 
     private String groupId;
     private String scheduleType; 
     

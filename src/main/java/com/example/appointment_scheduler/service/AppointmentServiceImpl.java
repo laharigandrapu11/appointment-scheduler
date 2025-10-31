@@ -168,7 +168,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointments;
     }
 
- @Override
+  @Override
     public Appointment bookAppointment(int appointmentId, User user) throws AppointmentAlreadyBookedException, AppointmentNotFoundException {
         
         Optional<Appointment> appointmentOptional = appointmentRepository.findById(appointmentId);
@@ -278,6 +278,12 @@ public class AppointmentServiceImpl implements AppointmentService {
     private void cancelAppointmentSlot(Appointment appointment) {
         appointment.setBooked(false);
         appointment.setBookedBy(null);
+        appointmentRepository.save(appointment);
+    }
+
+    
+    @Override
+    public void saveAppointment(Appointment appointment) {
         appointmentRepository.save(appointment);
     }
 }

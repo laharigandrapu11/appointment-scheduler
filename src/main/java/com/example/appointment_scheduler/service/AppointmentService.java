@@ -14,6 +14,7 @@ public interface AppointmentService {
    public Appointment bookAppointment(int appointmentId, User user) throws AppointmentNotFoundException, AppointmentAlreadyBookedException;
    public boolean hasUserBookedAppointment(User user);
    public void cancelAppointment(int appointmentId, User user) throws AppointmentNotFoundException, CancelAppointmentException;
+   public void saveAppointment(Appointment appointment);
     
 }
 
