@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 public interface AppointmentRepository extends JpaRepository<Appointment, Integer> {
     //save, delete, findAll are provided by JpaRepository
     Optional<Appointment> findById(int id);
-    Optional<Appointment> findByBookedBy(User user);
+    List<Appointment> findByBookedBy(User user);
     List<Appointment> findByGroupIdOrderByDateAscStartTimeAsc(String groupId);
     
 

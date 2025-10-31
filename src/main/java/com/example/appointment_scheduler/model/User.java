@@ -33,4 +33,5 @@ public class User {
     @NotBlank(message = "Role is a required field!!")
     private String role;
 
+    private String groupId;
 }

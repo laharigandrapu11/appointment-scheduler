@@ -1,5 +1,6 @@
 package com.example.appointment_scheduler.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,5 +13,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     //save, delete, findAll are provided by JpaRepository
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
+    List<User> findByGroupId(String groupId); 
     
 }

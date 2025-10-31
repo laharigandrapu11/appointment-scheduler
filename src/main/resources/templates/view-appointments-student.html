@@ -37,7 +37,7 @@
         </div>
         
         <div th:if="${user.role == 'STUDENT'}">
-          <div th:unless="${appointment.isBooked or userHasAppointment}" class="booking-actions">
+          <div th:unless="${appointment.isBooked}" class="booking-actions">
             <form th:action="@{/appointments/book/{id}(id=${appointment.id})}" method="POST" style="display: inline;">
               <button type="submit">
                 Book Now
@@ -67,10 +67,6 @@
         </div>
         
       </div>
-    </div>
-    
-    <div th:if="${userHasAppointment}">
-      <p>You already have a booked appointment!</p>
     </div>
     
     <div th:if="${appointments == null or appointments.empty}">

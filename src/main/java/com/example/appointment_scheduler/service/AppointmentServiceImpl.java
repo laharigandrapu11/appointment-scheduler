@@ -17,6 +17,7 @@ import com.example.appointment_scheduler.model.Appointment;
 import com.example.appointment_scheduler.model.DaySchedule;
 import com.example.appointment_scheduler.model.User;
 import com.example.appointment_scheduler.repository.AppointmentRepository;
+import com.example.appointment_scheduler.repository.UserRepository;
 
 @Service
 public class AppointmentServiceImpl implements AppointmentService {
@@ -26,6 +27,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Autowired
     private AppointmentRepository appointmentRepository;
+    
+    @Autowired
+    private UserRepository userRepository;
     
     @Override
     public List<Appointment> findAll() {
@@ -164,31 +168,67 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointments;
     }
 
-    @Override
+ @Override
     public Appointment bookAppointment(int appointmentId, User user) throws AppointmentAlreadyBookedException, AppointmentNotFoundException {
         
-        if (hasUserBookedAppointment(user)) {
-            throw new AppointmentAlreadyBookedException("You have already booked an appointment");
-        }
-        
-        Optional<Appointment> appointmentOptions = appointmentRepository.findById(appointmentId);
-        if (!appointmentOptions.isPresent()) {
+        Optional<Appointment> appointmentOptional = appointmentRepository.findById(appointmentId);
+        if (appointmentOptional.isPresent() == false) {
             throw new AppointmentNotFoundException("Appointment not found!");
         }
-        
-        Appointment appointment = appointmentOptions.get();
-        if (appointment.isBooked()) {
+        Appointment appointment = appointmentOptional.get();
+        if (appointment.isBooked() == true) {
             throw new AppointmentAlreadyBookedException("Appointment is already booked");
+        }
+        String appointmentType = appointment.getAppointmentType();
+        String appointmentGroupId = appointment.getGroupId();
+
+        if (appointmentType.equals("Group")) {
+            String userGroup = user.getGroupId();
+            if (userGroup == null) {
+                throw new AppointmentAlreadyBookedException("This is a group appointment, but you are not assigned to any group");
+            }
+            if (userGroup.isEmpty()) {
+                throw new AppointmentAlreadyBookedException("This is a group appointment, but you are not assigned to any group");
+            }
+            List<User> groupMembers = userRepository.findByGroupId(userGroup);
+            for (int i = 0; i < groupMembers.size(); i++) {
+                User member = groupMembers.get(i);
+                List<Appointment> memberAppointments = appointmentRepository.findByBookedBy(member);
+                for (int j = 0; j < memberAppointments.size(); j++) {
+                    Appointment bookedAppointment = memberAppointments.get(j);
+                    String bookedGroupId = bookedAppointment.getGroupId();
+                    if (bookedGroupId.equals(appointmentGroupId)) {
+                        String message = "A member of your group (" + member.getUsername() + ") has already booked a slot in this appointment group";
+                        throw new AppointmentAlreadyBookedException(message);
+                    }
+                }
+            }
+        }
+        
+
+        if (appointmentType.equals("Individual")) {
+            List<Appointment> userAppointments = appointmentRepository.findByBookedBy(user);
+            for (int i = 0; i < userAppointments.size(); i++) {
+                Appointment bookedAppointment = userAppointments.get(i);
+                String bookedGroupId = bookedAppointment.getGroupId();
+                if (bookedGroupId.equals(appointmentGroupId)) {
+                    throw new AppointmentAlreadyBookedException("You have already booked an appointment in this appointment group");
+                }
+            }
         }
         
         appointment.setBooked(true);
         appointment.setBookedBy(user);
-        return appointmentRepository.save(appointment);
+        Appointment savedAppointment = appointmentRepository.save(appointment);
+        return savedAppointment;
     }
-    
     @Override
     public boolean hasUserBookedAppointment(User user) {
-        return appointmentRepository.findByBookedBy(user).isPresent();
+        List<Appointment> userAppointments = appointmentRepository.findByBookedBy(user);
+        if (userAppointments.isEmpty()) {
+            return false;
+        }
+        return true;
     }
 
     @Override

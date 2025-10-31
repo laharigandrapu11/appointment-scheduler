@@ -59,11 +59,9 @@ public class WebController {
         }
         
         List<Appointment> appointments = appointmentService.findAll();
-        boolean hasUserBookedAppointment = appointmentService.hasUserBookedAppointment(user);
         
         model.addAttribute("appointments", appointments);
         model.addAttribute("user", user);
-        model.addAttribute("userHasAppointment", hasUserBookedAppointment);
         return "view-appointments-student";
     }
     

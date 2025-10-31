@@ -37,6 +37,7 @@ public class AppointmentSchedulerApplication {
 			student1.setEmail("student1@gmail.com");
 			student1.setPassword("password");
 			student1.setRole("STUDENT");
+			student1.setGroupId("GROUP_A");
 			userRepository.save(student1);
 			
 			User student2 = new User();
@@ -44,8 +45,25 @@ public class AppointmentSchedulerApplication {
 			student2.setEmail("student2@gmail.com");
 			student2.setPassword("password");
 			student2.setRole("STUDENT");
+			student2.setGroupId("GROUP_A");
 			userRepository.save(student2);
+			
+			User student3 = new User();
+			student3.setUsername("Student 3");
+			student3.setEmail("student3@gmail.com");
+			student3.setPassword("password");
+			student3.setRole("STUDENT");
+			student3.setGroupId("GROUP_A");
+			userRepository.save(student3);
 
+			User student4 = new User();
+			student4.setUsername("Student 4");
+			student4.setEmail("student4@gmail.com");
+			student4.setPassword("password");
+			student4.setRole("STUDENT");
+			student4.setGroupId(null);
+			userRepository.save(student4);
+			
 			User ta1 = new User();
 			ta1.setUsername("TA 1");
 			ta1.setEmail("ta@gmail.com");
