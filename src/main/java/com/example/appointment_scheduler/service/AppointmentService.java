@@ -15,6 +15,10 @@ public interface AppointmentService {
    public boolean hasUserBookedAppointment(User user);
    public void cancelAppointment(int appointmentId, User user) throws AppointmentNotFoundException, CancelAppointmentException;
    public void saveAppointment(Appointment appointment);
+   public boolean isGroupBooked(String groupId);
+   public void updateAppointmentGroup(String groupId, String title, String description, String location);
+   public Appointment findFirstAppointmentByGroupId(String groupId);
+   public void deleteAppointmentGroup(String groupId);
     
 }
 

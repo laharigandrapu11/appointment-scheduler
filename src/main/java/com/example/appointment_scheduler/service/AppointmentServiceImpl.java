@@ -286,4 +286,59 @@ public class AppointmentServiceImpl implements AppointmentService {
     public void saveAppointment(Appointment appointment) {
         appointmentRepository.save(appointment);
     }
+
+    @Override
+    public boolean isGroupBooked(String groupId) {
+        List<Appointment> allAppointments = appointmentRepository.findAll();
+        for (int i = 0; i < allAppointments.size(); i++) {
+            Appointment currentAppointment = allAppointments.get(i);
+            
+            if (currentAppointment.getGroupId().equals(groupId)) {
+                if (currentAppointment.isBooked() == true) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void updateAppointmentGroup(String groupId, String title, String description, String location) {
+        List<Appointment> allAppointments = appointmentRepository.findAll();
+        int counter = 1;
+        for (int i = 0; i < allAppointments.size(); i++) {
+            Appointment apt = allAppointments.get(i);
+            if (apt.getGroupId().equals(groupId)) {
+                String newTitle = title + " - Slot " + counter;
+                apt.setTitle(newTitle);
+                apt.setDescription(description);
+                apt.setLocation(location);
+                appointmentRepository.save(apt);
+                counter++;
+            }
+        }
+    }
+
+    @Override
+    public Appointment findFirstAppointmentByGroupId(String groupId) {
+        List<Appointment> allAppointments = appointmentRepository.findAll();
+        for (int index = 0; index < allAppointments.size(); index++) {
+            Appointment currentApt = allAppointments.get(index);
+            if (currentApt.getGroupId().equals(groupId)) {
+                return currentApt;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void deleteAppointmentGroup(String groupId) {
+        List<Appointment> allAppointments = appointmentRepository.findAll();
+        for (int i = 0; i < allAppointments.size(); i++) {
+            Appointment appointment = allAppointments.get(i);
+            if (appointment.getGroupId().equals(groupId)) {
+                appointmentRepository.delete(appointment);
+            }
+        }
+    }
 }

@@ -44,6 +44,18 @@
                 </button>
               </form>
               
+              <a th:if="${!appointment.isBooked}" th:href="@{/appointments/edit/{groupId}(groupId=${appointment.groupId})}" style="display: inline;">
+                <button type="button">
+                  Edit Group
+                </button>
+              </a>
+              
+              <form th:if="${!appointment.isBooked}" th:action="@{/appointments/delete/{groupId}(groupId=${appointment.groupId})}" method="POST" style="display: inline;">
+                <button type="submit">
+                  Delete Group
+                </button>
+              </form>
+              
               <form th:if="${appointment.isBooked}" th:action="@{/appointments/cancel/{id}(id=${appointment.id})}" method="POST" style="display: inline;">
                 <button type="submit">
                   Cancel This Slot

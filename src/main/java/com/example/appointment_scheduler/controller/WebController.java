@@ -195,7 +195,91 @@ public class WebController {
         redirectAttributes.addFlashAttribute("successMessage", "Appointment group status updated!");
         return "redirect:/appointments/upcoming";
     }
-    
+
+    @GetMapping("/appointments/edit/{groupId}")
+    public String showEditForm(@PathVariable String groupId, Model model, HttpSession session, RedirectAttributes redirectAttributes) {
+        User currentUser = (User) session.getAttribute("user");
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+        String userRole = currentUser.getRole();
+        if (userRole.equals("PROFESSOR") == false) {
+            return "redirect:/";
+        }
+        boolean isBooked = appointmentService.isGroupBooked(groupId);
+        if (isBooked == true) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Cannot edit! Someone has already booked a slot in this group! ");
+            return "redirect:/appointments/upcoming";
+        }
+        Appointment firstAppointment = appointmentService.findFirstAppointmentByGroupId(groupId);
+        if (firstAppointment == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Appointment group not found!!");
+            return "redirect:/appointments/upcoming";
+        }
+        model.addAttribute("appointment", firstAppointment);
+        model.addAttribute("user", currentUser);
+        return "edit-appointment";
+    }
+
+    @PostMapping("/appointments/edit/{groupId}")
+    public String processEditForm(@PathVariable String groupId, 
+                                @ModelAttribute Appointment appointment,
+                                HttpSession session, 
+                                RedirectAttributes redirectAttributes) {
+        User currentUser = (User) session.getAttribute("user");
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+        String role = currentUser.getRole();
+        if (!role.equals("PROFESSOR")) {
+            return "redirect:/";
+        }
+        boolean bookedStatus = appointmentService.isGroupBooked(groupId);
+        if (bookedStatus) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Cannot edit! Someone has already booked a slot in this group!");
+            return "redirect:/appointments/upcoming";
+        }
+        String appointmentTitle = appointment.getTitle();
+        String appointmentDescription = appointment.getDescription();
+        String appointmentLocation = appointment.getLocation();
+        if (appointmentTitle == null || appointmentTitle.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Title cannot be empty!");
+            return "redirect:/appointments/edit/" + groupId;
+        }
+        if (appointmentDescription == null || appointmentDescription.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Description cannot be empty!");
+            return "redirect:/appointments/edit/" + groupId;
+        }
+        if (appointmentLocation == null || appointmentLocation.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Location cannot be empty!");
+            return "redirect:/appointments/edit/" + groupId;
+        }
+        appointmentService.updateAppointmentGroup(groupId, appointmentTitle, appointmentDescription, appointmentLocation);
+        redirectAttributes.addFlashAttribute("successMessage", "Appointment group updated successfully!!");
+        return "redirect:/appointments/upcoming";
+    }
+
+    @PostMapping("/appointments/delete/{groupId}")
+    public String deleteAppointmentGroup(@PathVariable String groupId, HttpSession session, RedirectAttributes redirectAttributes) {
+        User currentUser = (User) session.getAttribute("user");
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+        String userRole = currentUser.getRole();
+        boolean isProfessor = userRole.equals("PROFESSOR");
+        if (isProfessor == false) {
+            return "redirect:/";
+        }
+        boolean isBooked = appointmentService.isGroupBooked(groupId);
+        if (isBooked == true) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Cannot delete! Someone has already booked a slot in this group!");
+            return "redirect:/appointments/upcoming";
+        }
+        appointmentService.deleteAppointmentGroup(groupId);
+        redirectAttributes.addFlashAttribute("successMessage", "Appointment group deleted successfully!");
+        return "redirect:/appointments/upcoming";
+    }
+
     private User getCurrentUser(HttpSession session) {
         return (User) session.getAttribute("user");
     }
