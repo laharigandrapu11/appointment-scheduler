@@ -5,3 +5,6 @@ services:
     dockerfilePath: ./Dockerfile
     plan: free
     branch: main
+    envVars:
+      - key: TZ
+        value: America/New_York
